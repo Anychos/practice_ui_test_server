@@ -1,0 +1,204 @@
+{% extends "base.html" %}
+
+{% block title %}Регистрация{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center auth-page-container"
+     data-testid="register-page-container"
+     id="register-page-container">
+    <div class="col-md-6"
+         data-testid="register-form-column"
+         id="register-form-column">
+        <div class="card"
+             data-testid="register-card"
+             id="register-card">
+            <div class="card-header"
+                 data-testid="register-card-header"
+                 id="register-card-header">
+                <h4 class="mb-0 auth-title"
+                    data-testid="register-title"
+                    id="register-title">Регистрация</h4>
+            </div>
+            <div class="card-body"
+                 data-testid="register-card-body"
+                 id="register-card-body">
+                <form method="POST" action="{{ url_for('register') }}"
+                      id="registerForm"
+                      data-testid="register-form"
+                      class="auth-form register-form">
+
+                    <div class="mb-3 form-field-container"
+                         data-testid="email-field-container"
+                         id="email-field-container">
+                        <label for="email" class="form-label"
+                               data-testid="email-label"
+                               id="email-label">Email</label>
+                        <input type="email" class="form-control"
+                               id="email" name="email"
+                               required
+                               data-testid="email-input">
+                        <div class="invalid-feedback"
+                             data-testid="email-error"
+                             id="email-error">
+                            Пожалуйста, введите корректный email
+                        </div>
+                    </div>
+
+                    <div class="mb-3 form-field-container"
+                         data-testid="name-field-container"
+                         id="name-field-container">
+                        <label for="name" class="form-label"
+                               data-testid="name-label"
+                               id="name-label">Имя</label>
+                        <input type="text" class="form-control"
+                               id="name" name="name"
+                               required
+                               data-testid="name-input">
+                        <div class="invalid-feedback"
+                             data-testid="name-error"
+                             id="name-error">
+                            Пожалуйста, введите ваше имя
+                        </div>
+                    </div>
+
+                    <div class="mb-3 form-field-container"
+                         data-testid="phone-field-container"
+                         id="phone-field-container">
+                        <label for="phone" class="form-label"
+                               data-testid="phone-label"
+                               id="phone-label">Телефон</label>
+                        <input type="tel" class="form-control"
+                               id="phone" name="phone"
+                               data-testid="phone-input">
+                    </div>
+
+                    <div class="mb-3 form-field-container"
+                         data-testid="password-field-container"
+                         id="password-field-container">
+                        <label for="password" class="form-label"
+                               data-testid="password-label"
+                               id="password-label">Пароль</label>
+                        <input type="password" class="form-control"
+                               id="password" name="password"
+                               required minlength="6"
+                               data-testid="password-input">
+                        <div class="invalid-feedback"
+                             data-testid="password-error"
+                             id="password-error">
+                            Пароль должен быть не менее 6 символов
+                        </div>
+                    </div>
+
+                    <div class="mb-3 form-field-container"
+                         data-testid="confirm-password-field-container"
+                         id="confirm-password-field-container">
+                        <label for="confirm_password" class="form-label"
+                               data-testid="confirm-password-label"
+                               id="confirm-password-label">Подтверждение пароля</label>
+                        <input type="password" class="form-control"
+                               id="confirm_password" name="confirm_password"
+                               required
+                               data-testid="confirm-password-input">
+                        <div id="passwordError"
+                             class="text-danger"
+                             style="display: none;"
+                             data-testid="password-match-error">Пароли не совпадают</div>
+                    </div>
+
+                    <div class="d-grid gap-2 submit-button-container"
+                         data-testid="submit-button-container"
+                         id="submit-button-container">
+                        <button type="submit" class="btn btn-primary"
+                                data-testid="register-submit-button"
+                                id="register-submit-button">Зарегистрироваться</button>
+                    </div>
+                </form>
+
+                <div class="mt-3 text-center auth-links-container"
+                     data-testid="login-link-container"
+                     id="login-link-container">
+                    <p data-testid="login-prompt-text"
+                       id="login-prompt-text"
+                       class="auth-prompt-text">
+                        Уже есть аккаунт?
+                        <a href="{{ url_for('login') }}"
+                           data-testid="login-link"
+                           id="login-link"
+                           class="auth-link">Войдите</a>
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script data-testid="register-validation-script"
+        id="register-validation-script"
+        class="auth-validation-script">
+document.addEventListener('DOMContentLoaded', function() {
+    const registerForm = document.getElementById('registerForm');
+    const password = document.getElementById('password');
+    const confirmPassword = document.getElementById('confirm_password');
+    const errorDiv = document.getElementById('passwordError');
+
+    if (registerForm) {
+        registerForm.addEventListener('submit', function(e) {
+            const passwordValue = password.value;
+            const confirmPasswordValue = confirmPassword.value;
+
+            if (passwordValue !== confirmPasswordValue) {
+                e.preventDefault();
+                e.stopPropagation();
+                errorDiv.style.display = 'block';
+                errorDiv.setAttribute('data-testid', 'password-match-error-visible');
+                errorDiv.setAttribute('id', 'password-match-error-visible');
+
+                // Добавляем класс ошибки к полям
+                password.classList.add('is-invalid');
+                confirmPassword.classList.add('is-invalid');
+                return false;
+            } else {
+                errorDiv.style.display = 'none';
+                password.classList.remove('is-invalid');
+                confirmPassword.classList.remove('is-invalid');
+            }
+            return true;
+        });
+
+        // Добавляем валидацию при вводе
+        function validatePasswordMatch() {
+            if (password.value === confirmPassword.value) {
+                errorDiv.style.display = 'none';
+                password.classList.remove('is-invalid');
+                confirmPassword.classList.remove('is-invalid');
+                password.classList.add('is-valid');
+                confirmPassword.classList.add('is-valid');
+            } else {
+                password.classList.remove('is-valid');
+                confirmPassword.classList.remove('is-valid');
+            }
+        }
+
+        password.addEventListener('keyup', validatePasswordMatch);
+        confirmPassword.addEventListener('keyup', validatePasswordMatch);
+    }
+
+    // Валидация Bootstrap
+    (function() {
+        'use strict';
+        const forms = document.querySelectorAll('.needs-validation');
+        Array.from(forms).forEach(function(form) {
+            form.addEventListener('submit', function(event) {
+                if (!form.checkValidity()) {
+                    event.preventDefault();
+                    event.stopPropagation();
+                }
+                form.classList.add('was-validated');
+            }, false);
+        });
+    })();
+});
+</script>
+{% endblock %}

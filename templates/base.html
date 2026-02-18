@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="ru" data-testid="page-html" id="page-html" class="html-page">
+<head>
+    <meta charset="UTF-8" data-testid="meta-charset" id="meta-charset">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" data-testid="meta-viewport" id="meta-viewport">
+    <title data-testid="page-title" id="page-title">{% block title %}Интернет-магазин{% endblock %}</title>
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet"
+          data-testid="bootstrap-css" id="bootstrap-css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}"
+          data-testid="custom-css" id="custom-css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css"
+          data-testid="bootstrap-icons" id="bootstrap-icons">
+</head>
+<body data-testid="page-body" id="page-body" class="body-page">
+    <!-- Хедер (шапка) -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark py-3" data-testid="main-navbar" id="main-navbar" class="main-navigation">
+        <div class="container" data-testid="navbar-container" id="navbar-container">
+            <!-- Логотип -->
+            <a class="navbar-brand" href="{{ url_for('index') }}"
+               data-testid="navbar-brand" id="navbar-brand">
+                <i class="bi bi-shop" data-testid="navbar-icon" id="navbar-icon"></i> Магазин
+            </a>
+
+            <!-- Кнопка меню для мобильных -->
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse"
+                    data-bs-target="#navbarNav" data-testid="navbar-toggler" id="navbar-toggler">
+                <span class="navbar-toggler-icon" data-testid="navbar-toggler-icon" id="navbar-toggler-icon"></span>
+            </button>
+
+            <!-- Основное меню -->
+            <div class="collapse navbar-collapse" id="navbarNav" data-testid="navbar-collapse">
+                <!-- Левая часть меню -->
+                <ul class="navbar-nav me-auto" data-testid="navbar-left-menu" id="navbar-left-menu">
+                    <li class="nav-item" data-testid="nav-home-item" id="nav-home-item">
+                        <a class="nav-link" href="{{ url_for('index') }}"
+                           data-testid="nav-home-link" id="nav-home-link">
+                            <i class="bi bi-house" data-testid="nav-home-icon" id="nav-home-icon"></i> Главная
+                        </a>
+                    </li>
+                    {% if session.get('user_id') %}
+                    <li class="nav-item" data-testid="nav-cart-item" id="nav-cart-item">
+                        <a class="nav-link" href="{{ url_for('cart') }}"
+                           data-testid="nav-cart-link" id="nav-cart-link">
+                            <i class="bi bi-cart" data-testid="nav-cart-icon" id="nav-cart-icon"></i> Корзина
+                        </a>
+                    </li>
+                    <li class="nav-item" data-testid="nav-orders-item" id="nav-orders-item">
+                        <a class="nav-link" href="{{ url_for('orders') }}"
+                           data-testid="nav-orders-link" id="nav-orders-link">
+                            <i class="bi bi-list-check" data-testid="nav-orders-icon" id="nav-orders-icon"></i> Заказы
+                        </a>
+                    </li>
+                    {% endif %}
+                </ul>
+
+                <!-- Правая часть меню -->
+                <div class="navbar-nav" data-testid="navbar-right-menu" id="navbar-right-menu">
+                    {% if session.get('user_id') %}
+                    <!-- Меню авторизованного пользователя -->
+                    <li class="nav-item dropdown" data-testid="user-dropdown" id="user-dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" role="button"
+                           data-bs-toggle="dropdown" data-testid="user-dropdown-toggle" id="user-dropdown-toggle">
+                            <i class="bi bi-person-circle" data-testid="user-icon" id="user-icon"></i>
+                            <span data-testid="user-name" id="user-name">{{ session.get('user_name', 'Пользователь') }}</span>
+                        </a>
+                        <ul class="dropdown-menu dropdown-menu-end" data-testid="user-dropdown-menu" id="user-dropdown-menu">
+                            <li data-testid="dropdown-profile-item" id="dropdown-profile-item">
+                                <a class="dropdown-item" href="{{ url_for('profile') }}"
+                                   data-testid="dropdown-profile-link" id="dropdown-profile-link">
+                                    <i class="bi bi-person" data-testid="dropdown-profile-icon" id="dropdown-profile-icon"></i> Профиль
+                                </a>
+                            </li>
+                            <li data-testid="dropdown-settings-item" id="dropdown-settings-item">
+                                <a class="dropdown-item" href="{{ url_for('profile') }}#settings"
+                                   data-testid="dropdown-settings-link" id="dropdown-settings-link">
+                                    <i class="bi bi-gear" data-testid="dropdown-settings-icon" id="dropdown-settings-icon"></i> Настройки
+                                </a>
+                            </li>
+                            {% if session.get('is_admin') %}
+                            <li data-testid="dropdown-divider-admin" id="dropdown-divider-admin">
+                                <hr class="dropdown-divider" data-testid="dropdown-divider" id="dropdown-divider-admin-hr">
+                            </li>
+                            <li data-testid="dropdown-admin-item" id="dropdown-admin-item">
+                                <a class="dropdown-item" href="#" data-testid="dropdown-admin-link" id="dropdown-admin-link">
+                                    <i class="bi bi-gear" data-testid="dropdown-admin-icon" id="dropdown-admin-icon"></i> Админ-панель
+                                </a>
+                            </li>
+                            {% endif %}
+                            <li data-testid="dropdown-divider-logout" id="dropdown-divider-logout">
+                                <hr class="dropdown-divider" data-testid="dropdown-divider" id="dropdown-divider-logout-hr">
+                            </li>
+                            <li data-testid="dropdown-logout-item" id="dropdown-logout-item">
+                                <a class="dropdown-item" href="{{ url_for('logout') }}"
+                                   data-testid="dropdown-logout-link" id="dropdown-logout-link">
+                                    <i class="bi bi-box-arrow-right" data-testid="dropdown-logout-icon" id="dropdown-logout-icon"></i> Выйти
+                                </a>
+                            </li>
+                        </ul>
+                    </li>
+                    {% else %}
+                    <!-- Меню для неавторизованных -->
+                    <li class="nav-item" data-testid="nav-login-item" id="nav-login-item">
+                        <a class="nav-link" href="{{ url_for('login') }}"
+                           data-testid="nav-login-link" id="nav-login-link">
+                            <i class="bi bi-box-arrow-in-right" data-testid="nav-login-icon" id="nav-login-icon"></i> Войти
+                        </a>
+                    </li>
+                    <li class="nav-item" data-testid="nav-register-item" id="nav-register-item">
+                        <a class="nav-link" href="{{ url_for('register') }}"
+                           data-testid="nav-register-link" id="nav-register-link">
+                            <i class="bi bi-person-plus" data-testid="nav-register-icon" id="nav-register-icon"></i> Регистрация
+                        </a>
+                    </li>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Основной контент -->
+    <div class="container mt-4 mb-4" data-testid="main-container" id="main-container">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                <div data-testid="flash-messages-container" id="flash-messages-container">
+                    {% for category, message in messages %}
+                        <div class="alert alert-{{ category }} alert-dismissible fade show"
+                             role="alert" data-testid="flash-message-{{ category }}" id="flash-message-{{ category }}">
+                            <i class="bi bi-{% if category == 'success' %}check-circle{% elif category == 'danger' %}exclamation-triangle{% elif category == 'warning' %}exclamation-circle{% else %}info-circle{% endif %}"
+                               data-testid="flash-icon" id="flash-icon-{{ category }}"></i>
+                            <span data-testid="flash-message-text" id="flash-message-text-{{ loop.index }}">{{ message }}</span>
+                            <button type="button" class="btn-close" data-bs-dismiss="alert"
+                                    data-testid="flash-close-button" id="flash-close-button-{{ loop.index }}"></button>
+                        </div>
+                    {% endfor %}
+                </div>
+            {% endif %}
+        {% endwith %}
+
+        {% block content %}{% endblock %}
+    </div>
+
+    <!-- Футер -->
+    <footer class="footer mt-auto py-4 bg-dark text-light" data-testid="main-footer" id="main-footer">
+        <div class="container" data-testid="footer-container" id="footer-container">
+            <div class="row" data-testid="footer-row" id="footer-row">
+                <!-- Колонка с контактами -->
+                <div class="col-lg-4 mb-4 mb-lg-0" data-testid="footer-contacts-column" id="footer-contacts-column">
+                    <div class="footer-section" data-testid="contacts-section" id="contacts-section">
+                        <h5 class="footer-title mb-3" data-testid="contacts-title" id="contacts-title">
+                            <i class="bi bi-telephone" data-testid="contacts-icon" id="contacts-icon"></i> Контакты
+                        </h5>
+                        <ul class="list-unstyled" data-testid="contacts-list" id="contacts-list">
+                            <li class="mb-2" data-testid="contact-phone" id="contact-phone">
+                                <i class="bi bi-phone me-2" data-testid="phone-icon" id="phone-icon"></i>
+                                <a href="tel:+78001234567" class="text-light text-decoration-none"
+                                   data-testid="phone-link" id="phone-link">8-800-123-45-67</a>
+                            </li>
+                            <li class="mb-2" data-testid="contact-email" id="contact-email">
+                                <i class="bi bi-envelope me-2" data-testid="email-icon" id="email-icon"></i>
+                                <a href="mailto:support@example.com" class="text-light text-decoration-none"
+                                   data-testid="email-link" id="email-link">support@example.com</a>
+                            </li>
+                            <li class="mb-2" data-testid="contact-address" id="contact-address">
+                                <i class="bi bi-geo-alt me-2" data-testid="address-icon" id="address-icon"></i>
+                                <span data-testid="address-text" id="address-text">г. Москва, ул. Примерная, д. 1</span>
+                            </li>
+                            <li class="mb-2" data-testid="contact-hours" id="contact-hours">
+                                <i class="bi bi-clock me-2" data-testid="hours-icon" id="hours-icon"></i>
+                                <span data-testid="hours-text" id="hours-text">Пн-Пт: 9:00-20:00, Сб-Вс: 10:00-18:00</span>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Колонка с информацией -->
+                <div class="col-lg-4 mb-4 mb-lg-0" data-testid="footer-info-column" id="footer-info-column">
+                    <div class="footer-section" data-testid="info-section" id="info-section">
+                        <h5 class="footer-title mb-3" data-testid="info-title" id="info-title">
+                            <i class="bi bi-info-circle" data-testid="info-icon" id="info-icon"></i> Информация
+                        </h5>
+                        <ul class="list-unstyled" data-testid="info-links" id="info-links">
+                            <li class="mb-2" data-testid="link-about" id="link-about">
+                                <a href="#" class="text-light text-decoration-none" data-testid="about-link" id="about-link">
+                                    <i class="bi bi-chevron-right me-1" data-testid="link-icon" id="link-icon-about"></i> О магазине
+                                </a>
+                            </li>
+                            <li class="mb-2" data-testid="link-delivery" id="link-delivery">
+                                <a href="#" class="text-light text-decoration-none" data-testid="delivery-link" id="delivery-link">
+                                    <i class="bi bi-chevron-right me-1" data-testid="link-icon" id="link-icon-delivery"></i> Доставка и оплата
+                                </a>
+                            </li>
+                            <li class="mb-2" data-testid="link-guarantee" id="link-guarantee">
+                                <a href="#" class="text-light text-decoration-none" data-testid="guarantee-link" id="guarantee-link">
+                                    <i class="bi bi-chevron-right me-1" data-testid="link-icon" id="link-icon-guarantee"></i> Гарантия
+                                </a>
+                            </li>
+                            <li class="mb-2" data-testid="link-faq" id="link-faq">
+                                <a href="#" class="text-light text-decoration-none" data-testid="faq-link" id="faq-link">
+                                    <i class="bi bi-chevron-right me-1" data-testid="link-icon" id="link-icon-faq"></i> Частые вопросы
+                                </a>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Колонка с правовой информацией -->
+                <div class="col-lg-4" data-testid="footer-legal-column" id="footer-legal-column">
+                    <div class="footer-section" data-testid="legal-section" id="legal-section">
+                        <h5 class="footer-title mb-3" data-testid="legal-title" id="legal-title">
+                            <i class="bi bi-shield-check" data-testid="legal-icon" id="legal-icon"></i> Правовая информация
+                        </h5>
+                        <ul class="list-unstyled" data-testid="legal-links" id="legal-links">
+                            <li class="mb-2" data-testid="link-privacy" id="link-privacy">
+                                <a href="#" class="text-light text-decoration-none" data-testid="privacy-link" id="privacy-link">
+                                    <i class="bi bi-file-text me-1" data-testid="document-icon" id="document-icon-privacy"></i> Политика конфиденциальности
+                                </a>
+                            </li>
+                            <li class="mb-2" data-testid="link-terms" id="link-terms">
+                                <a href="#" class="text-light text-decoration-none" data-testid="terms-link" id="terms-link">
+                                    <i class="bi bi-file-text me-1" data-testid="document-icon" id="document-icon-terms"></i> Пользовательское соглашение
+                                </a>
+                            </li>
+                            <li class="mb-2" data-testid="link-offer" id="link-offer">
+                                <a href="#" class="text-light text-decoration-none" data-testid="offer-link" id="offer-link">
+                                    <i class="bi bi-file-text me-1" data-testid="document-icon" id="document-icon-offer"></i> Публичная оферта
+                                </a>
+                            </li>
+                            <li class="mb-2" data-testid="link-cookies" id="link-cookies">
+                                <a href="#" class="text-light text-decoration-none" data-testid="cookies-link" id="cookies-link">
+                                    <i class="bi bi-file-text me-1" data-testid="document-icon" id="document-icon-cookies"></i> Политика использования cookies
+                                </a>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Bootstrap 5 JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"
+            data-testid="bootstrap-js" id="bootstrap-js"></script>
+    {% block scripts %}{% endblock %}
+</body>
+</html>

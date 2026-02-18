@@ -1,0 +1,103 @@
+{% extends "base.html" %}
+
+{% block title %}Вход в систему{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center auth-page-container"
+     data-testid="login-page-container"
+     id="login-page-container">
+    <div class="col-md-6"
+         data-testid="login-form-column"
+         id="login-form-column">
+        <div class="card"
+             data-testid="login-card"
+             id="login-card">
+            <div class="card-header"
+                 data-testid="login-card-header"
+                 id="login-card-header">
+                <h4 class="mb-0 auth-title"
+                    data-testid="login-title"
+                    id="login-title">Вход в систему</h4>
+            </div>
+            <div class="card-body"
+                 data-testid="login-card-body"
+                 id="login-card-body">
+                <form method="POST" action="{{ url_for('login') }}"
+                      data-testid="login-form"
+                      id="login-form"
+                      class="auth-form">
+
+                    <div class="mb-3 form-field-container"
+                         data-testid="login-email-container"
+                         id="login-email-container">
+                        <label for="email" class="form-label"
+                               data-testid="login-email-label"
+                               id="login-email-label">Email</label>
+                        <input type="email" class="form-control"
+                               id="email" name="email"
+                               value="{{ email if email else '' }}"
+                               required
+                               data-testid="login-email-input">
+                        <div class="invalid-feedback"
+                             data-testid="login-email-error"
+                             id="login-email-error">
+                            Пожалуйста, введите корректный email
+                        </div>
+                    </div>
+
+                    <div class="mb-3 form-field-container"
+                         data-testid="login-password-container"
+                         id="login-password-container">
+                        <label for="password" class="form-label"
+                               data-testid="login-password-label"
+                               id="login-password-label">Пароль</label>
+                        <input type="password" class="form-control"
+                               id="password" name="password"
+                               required
+                               data-testid="login-password-input">
+                        <div class="invalid-feedback"
+                             data-testid="login-password-error"
+                             id="login-password-error">
+                            Пожалуйста, введите пароль
+                        </div>
+                    </div>
+
+                    <div class="mb-3 form-check"
+                         data-testid="remember-me-container"
+                         id="remember-me-container">
+                        <input type="checkbox" class="form-check-input"
+                               id="remember" name="remember"
+                               data-testid="remember-me-checkbox">
+                        <label class="form-check-label"
+                               for="remember"
+                               data-testid="remember-me-label"
+                               id="remember-me-label">Запомнить меня</label>
+                    </div>
+
+                    <div class="d-grid gap-2 submit-button-container"
+                         data-testid="login-submit-container"
+                         id="login-submit-container">
+                        <button type="submit" class="btn btn-primary"
+                                data-testid="login-submit-button"
+                                id="login-submit-button">Войти</button>
+                    </div>
+                </form>
+
+                <div class="mt-3 text-center auth-links-container"
+                     data-testid="register-link-container"
+                     id="register-link-container">
+                    <p data-testid="register-prompt-text"
+                       id="register-prompt-text"
+                       class="auth-prompt-text">
+                        Нет аккаунта?
+                        <a href="{{ url_for('register') }}"
+                           data-testid="register-link"
+                           id="register-link"
+                           class="auth-link">Зарегистрируйтесь</a>
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,587 @@
+{% extends "base.html" %}
+
+{% block title %}Корзина - Интернет-магазин{% endblock %}
+
+{% block content %}
+<div class="container py-4" data-testid="cart-page">
+    <!-- Хлебные крошки -->
+    <nav aria-label="breadcrumb" class="mb-4" data-testid="cart-breadcrumb">
+        <ol class="breadcrumb" data-testid="breadcrumb-list">
+            <li class="breadcrumb-item" data-testid="breadcrumb-home">
+                <a href="{{ url_for('index') }}" data-testid="breadcrumb-home-link" class="text-decoration-none">
+                    <i class="bi bi-house" data-testid="breadcrumb-home-icon"></i> Главная
+                </a>
+            </li>
+            <li class="breadcrumb-item active" aria-current="page" data-testid="breadcrumb-cart">
+                <i class="bi bi-cart" data-testid="breadcrumb-cart-icon"></i> Корзина
+            </li>
+        </ol>
+    </nav>
+
+    <h1 class="mb-4" data-testid="cart-title">
+        <i class="bi bi-cart" data-testid="cart-title-icon"></i> Корзина покупок
+    </h1>
+
+    {% if cart and cart.id and cart_items and cart_items|length > 0 %}
+    <div class="row" data-testid="cart-content">
+        <!-- Левая колонка - список товаров -->
+        <div class="col-lg-8 mb-4" data-testid="cart-items-column">
+            <div class="card" data-testid="cart-items-card">
+                <div class="card-header" data-testid="cart-items-header">
+                    <div class="d-flex justify-content-between align-items-center" data-testid="cart-header-content">
+                        <div data-testid="cart-info">
+                            <h5 class="mb-0" data-testid="cart-number">
+                                Корзина #{{ cart.id }}
+                            </h5>
+                            <small class="text" data-testid="items-count">
+                                {{ cart.total_quantity }} товар(ов) на {{ cart.total_price }} ₽
+                            </small>
+                        </div>
+                        <button class="btn btn-outline-danger btn-sm" id="clearCartButton" data-testid="clear-cart-button">
+                            <i class="bi bi-trash" data-testid="clear-cart-icon"></i> Очистить корзину
+                        </button>
+                    </div>
+                </div>
+
+                <div class="card-body" data-testid="cart-items-body">
+                    <div class="list-group" data-testid="cart-items-list">
+                        {% for item in cart_items %}
+                        <div class="list-group-item" data-testid="cart-item-{{ item.product_id }}">
+                            <div class="row align-items-center" data-testid="cart-item-row-{{ item.product_id }}">
+                                <!-- Изображение товара -->
+                                <div class="col-3 col-md-2" data-testid="cart-item-image-column">
+                                    <a href="{{ url_for('product_detail', product_id=item.product_id) }}"
+                                       data-testid="cart-item-image-link-{{ item.product_id }}">
+                                        <img src="{{ item.product_image_url if item.product_image_url else 'https://33m2.com.ua/pictures/no-image.jpg' }}"
+                                             alt="{{ item.product_name }}"
+                                             class="img-fluid rounded"
+                                             style="max-height: 80px; min-width: 80px; object-fit: cover;"
+                                             data-testid="cart-item-image-{{ item.product_id }}"
+                                             onerror="this.src='https://33m2.com.ua/pictures/no-image.jpg'; this.onerror=null;">
+                                    </a>
+                                </div>
+
+                                <!-- Информация о товаре -->
+                                <div class="col-5 col-md-6" data-testid="cart-item-info-column">
+                                    <h6 class="mb-1" data-testid="cart-item-name-{{ item.product_id }}">
+                                        <a href="{{ url_for('product_detail', product_id=item.product_id) }}"
+                                           class="text-decoration-none text-dark"
+                                           data-testid="cart-item-name-link-{{ item.product_id }}">
+                                            {{ item.product_name }}
+                                        </a>
+                                    </h6>
+
+                                    <div class="text-muted small" data-testid="cart-item-price-{{ item.product_id }}">
+                                        {{ item.product_price }} ₽ за шт.
+                                    </div>
+
+                                    <!-- Предупреждения о доступности -->
+                                    {% if not item.is_available %}
+                                    <div class="text-danger small mt-1" data-testid="cart-item-unavailable-warning-{{ item.product_id }}">
+                                        <i class="bi bi-exclamation-triangle" data-testid="unavailable-icon"></i>
+                                        <span data-testid="unavailable-text">Товар временно недоступен</span>
+                                    </div>
+                                    {% elif not item.has_enough_stock %}
+                                    <div class="text-warning small mt-1" data-testid="cart-item-stock-warning-{{ item.product_id }}">
+                                        <i class="bi bi-exclamation-triangle" data-testid="stock-warning-icon"></i>
+                                        <span data-testid="stock-warning-text">
+                                            Доступно только {{ item.available_quantity }} шт.
+                                        </span>
+                                    </div>
+                                    {% endif %}
+                                </div>
+
+                                <!-- Количество и управление -->
+                                <div class="col-4 col-md-4" data-testid="cart-item-controls-column">
+                                    <div class="d-flex align-items-center justify-content-end" data-testid="cart-item-controls">
+                                        <!-- Управление количеством -->
+                                        <div class="input-group input-group-sm" style="width: 120px;"
+                                             data-testid="quantity-control-{{ item.product_id }}">
+                                            <button class="btn btn-outline-secondary decrease-quantity"
+                                                    type="button"
+                                                    data-product-id="{{ item.product_id }}"
+                                                    data-testid="decrease-button-{{ item.product_id }}">
+                                                <i class="bi bi-dash" data-testid="decrease-icon"></i>
+                                            </button>
+
+                                            <input type="number"
+                                                   class="form-control text-center quantity-input"
+                                                   value="{{ item.quantity }}"
+                                                   min="1"
+                                                   max="{{ item.available_quantity if not item.has_enough_stock else 99 }}"
+                                                   data-product-id="{{ item.product_id }}"
+                                                   data-testid="quantity-input-{{ item.product_id }}">
+
+                                            <button class="btn btn-outline-secondary increase-quantity"
+                                                    type="button"
+                                                    data-product-id="{{ item.product_id }}"
+                                                    data-testid="increase-button-{{ item.product_id }}">
+                                                <i class="bi bi-plus" data-testid="increase-icon"></i>
+                                            </button>
+                                        </div>
+
+                                        <!-- Цена за позицию -->
+                                        <div class="ms-3 text-end" style="min-width: 80px;"
+                                             data-testid="cart-item-total-{{ item.product_id }}">
+                                            <div class="fw-bold" data-testid="item-total-price-{{ item.product_id }}">
+                                                {{ item.item_total }} ₽
+                                            </div>
+                                        </div>
+
+                                        <!-- Удалить -->
+                                        <button class="btn btn-link text-danger ms-2 remove-item"
+                                                data-product-id="{{ item.product_id }}"
+                                                data-testid="remove-item-button-{{ item.product_id }}">
+                                            <i class="bi bi-x-lg" data-testid="remove-icon"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Правая колонка - итоги и оформление -->
+        <div class="col-lg-4" data-testid="cart-summary-column">
+            <div class="card sticky-top" style="top: 20px;" data-testid="cart-summary-card">
+                <div class="card-header" data-testid="summary-header">
+                    <h5 class="mb-0" data-testid="summary-title">Итого</h5>
+                </div>
+
+                <div class="card-body" data-testid="summary-body">
+                    <!-- Детализация стоимости -->
+                    <div class="mb-3" data-testid="price-breakdown">
+                        <div class="d-flex justify-content-between mb-2" data-testid="subtotal-row">
+                            <span data-testid="subtotal-label">Товары ({{ cart.total_quantity }})</span>
+                            <span data-testid="subtotal-value">{{ cart.total_price }} ₽</span>
+                        </div>
+
+                        <div class="d-flex justify-content-between mb-2" data-testid="delivery-row">
+                            <span data-testid="delivery-label">Доставка</span>
+                            <span data-testid="delivery-value">
+                                {% if cart.total_price >= 1000 %}
+                                <span class="text-success" data-testid="free-delivery">Бесплатно</span>
+                                {% else %}
+                                100 ₽
+                                {% endif %}
+                            </span>
+                        </div>
+
+                        <hr data-testid="summary-divider">
+
+                        <div class="d-flex justify-content-between fw-bold fs-5" data-testid="total-row">
+                            <span data-testid="total-label">К оплате</span>
+                            <span data-testid="total-value">
+                                {% if cart.total_price >= 1000 %}
+                                {{ cart.total_price }} ₽
+                                {% else %}
+                                {{ cart.total_price + 100 }} ₽
+                                {% endif %}
+                            </span>
+                        </div>
+                    </div>
+
+                    <!-- Информация о бесплатной доставке -->
+                    {% if cart.total_price < 1000 %}
+                    <div class="alert alert-info small mb-3" data-testid="delivery-info">
+                        <div class="d-flex align-items-center" data-testid="delivery-info-content">
+                            <i class="bi bi-truck fs-5 me-2" data-testid="delivery-info-icon"></i>
+                            <div data-testid="delivery-info-text">
+                                <p class="mb-0" data-testid="delivery-info-message">
+                                    Добавьте товаров на {{1000 - cart.total_price}} ₽ для бесплатной доставки
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                    {% endif %}
+
+                    <!-- Проверка доступности товаров -->
+                    {% set has_unavailable = cart_items|selectattr('is_available', 'equalto', false)|list|length > 0 %}
+                    {% set has_insufficient_stock = cart_items|selectattr('has_enough_stock', 'equalto', false)|list|length > 0 %}
+
+                    {% if has_unavailable or has_insufficient_stock %}
+                    <div class="alert alert-warning small mb-3" data-testid="availability-warning">
+                        <div class="d-flex align-items-center" data-testid="warning-content">
+                            <i class="bi bi-exclamation-triangle fs-5 me-2" data-testid="warning-icon"></i>
+                            <div data-testid="warning-text">
+                                <p class="mb-0" data-testid="warning-message">
+                                    {% if has_unavailable %}
+                                    Некоторые товары недоступны
+                                    {% elif has_insufficient_stock %}
+                                    Недостаточно товара на складе
+                                    {% endif %}
+                                    <br>
+                                    <small data-testid="warning-hint">
+                                        Проверьте корзину перед оформлением
+                                    </small>
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                    {% endif %}
+
+                    <!-- Кнопка оформления заказа -->
+                    <div class="d-grid gap-2" data-testid="checkout-actions">
+                        {% if has_unavailable or has_insufficient_stock %}
+                        <button class="btn btn-secondary btn-lg" disabled data-testid="checkout-disabled-button">
+                            <i class="bi bi-exclamation-circle" data-testid="disabled-checkout-icon"></i>
+                            Проверьте корзину
+                        </button>
+                        {% else %}
+                        <a href="{{ url_for('checkout') }}" class="btn btn-primary btn-lg" data-testid="checkout-button">
+                            <i class="bi bi-bag-check" data-testid="checkout-icon"></i> Оформить заказ
+                        </a>
+                        {% endif %}
+
+                        <a href="{{ url_for('index') }}" class="btn btn-outline-secondary" data-testid="continue-shopping-button">
+                            <i class="bi bi-arrow-left" data-testid="continue-shopping-icon"></i> Продолжить покупки
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% else %}
+    <!-- Корзина пуста -->
+    <div class="text-center py-5" data-testid="empty-cart-message">
+        <div class="mb-4" data-testid="empty-cart-icon">
+            <i class="bi bi-cart-x text-muted" style="font-size: 4rem;"></i>
+        </div>
+        <h3 data-testid="empty-cart-title">Ваша корзина пуста</h3>
+        <p class="text-muted mb-4" data-testid="empty-cart-text">
+            Добавьте товары, чтобы продолжить покупки
+        </p>
+        <div data-testid="empty-cart-actions">
+            <a href="{{ url_for('index') }}" class="btn btn-primary btn-lg" data-testid="browse-products-button">
+                <i class="bi bi-grid" data-testid="browse-icon"></i> Перейти к товарам
+            </a>
+        </div>
+    </div>
+    {% endif %}
+</div>
+<!-- Модальное окно подтверждения очистки корзины -->
+<div class="modal fade" id="clearCartModal" tabindex="-1" aria-labelledby="clearCartModalLabel" aria-hidden="true" data-testid="clear-cart-modal">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content" data-testid="clear-cart-modal-content">
+            <div class="modal-header" data-testid="clear-cart-modal-header">
+                <h5 class="modal-title" id="clearCartModalLabel" data-testid="clear-cart-modal-title">
+                    <i class="bi bi-exclamation-triangle text-warning me-2" data-testid="warning-icon"></i>
+                    Подтверждение очистки корзины
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" data-testid="clear-cart-modal-close"></button>
+            </div>
+            <div class="modal-body" data-testid="clear-cart-modal-body">
+                <div class="alert alert-warning mb-0" data-testid="clear-cart-warning-alert">
+                    <div class="d-flex align-items-center" data-testid="alert-content">
+                        <i class="bi bi-trash fs-4 me-3" data-testid="trash-icon"></i>
+                        <div data-testid="alert-text">
+                            <p class="mb-0" data-testid="warning-message">
+                                Вы уверены, что хотите очистить корзину?
+                                <br>
+                                <small data-testid="warning-hint" class="text-muted">
+                                    Все товары будут удалены. Это действие нельзя отменить.
+                                </small>
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Информация о товарах в корзине -->
+                {% if cart and cart_items and cart_items|length > 0 %}
+                <div class="mt-3" data-testid="cart-items-summary">
+                    <h6 data-testid="summary-title">Будет удалено:</h6>
+                    <ul class="list-group list-group-flush small" data-testid="items-list">
+                        {% for item in cart_items[:3] %}
+                        <li class="list-group-item px-0 py-1" data-testid="item-{{ item.product_id }}">
+                            <div class="d-flex justify-content-between" data-testid="item-row-{{ item.product_id }}">
+                                <span data-testid="item-name-{{ item.product_id }}">
+                                    {{ item.product_name[:30] }}{% if item.product_name|length > 30 %}...{% endif %}
+                                </span>
+                                <span class="text-muted" data-testid="item-quantity-{{ item.product_id }}">
+                                    {{ item.quantity }} шт.
+                                </span>
+                            </div>
+                        </li>
+                        {% endfor %}
+                        {% if cart_items|length > 3 %}
+                        <li class="list-group-item px-0 py-1 text-center" data-testid="more-items">
+                            <small class="text-muted" data-testid="more-items-text">
+                                и ещё {{ cart_items|length - 3 }} товар(ов)
+                            </small>
+                        </li>
+                        {% endif %}
+                    </ul>
+                </div>
+                {% endif %}
+            </div>
+            <div class="modal-footer" data-testid="clear-cart-modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" data-testid="cancel-clear-button">
+                    <i class="bi bi-x-circle" data-testid="cancel-icon"></i> Отмена
+                </button>
+                <button type="button" class="btn btn-danger" id="confirmClearCartButton" data-testid="confirm-clear-button">
+                    <i class="bi bi-trash" data-testid="confirm-trash-icon"></i>
+                    <span data-testid="confirm-clear-text">Очистить корзину</span>
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script data-testid="cart-page-script">
+document.addEventListener('DOMContentLoaded', function() {
+    // Функция показа уведомления
+    function showNotification(message, type = 'info') {
+        const alertDiv = document.createElement('div');
+        alertDiv.className = `alert alert-${type} alert-dismissible fade show position-fixed`;
+        alertDiv.style.cssText = 'top: 20px; right: 20px; z-index: 1050; min-width: 300px;';
+        alertDiv.setAttribute('data-testid', 'cart-notification');
+
+        const icon = type === 'success' ? 'check-circle' :
+                     type === 'danger' ? 'exclamation-triangle' : 'info-circle';
+
+        alertDiv.innerHTML = `
+            <i class="bi bi-${icon}" data-testid="notification-icon"></i>
+            <span class="ms-2" data-testid="notification-message">${message}</span>
+            <button type="button" class="btn-close" data-bs-dismiss="alert"
+                    data-testid="notification-close-button"></button>
+        `;
+
+        document.body.appendChild(alertDiv);
+
+        setTimeout(() => {
+            if (alertDiv.parentNode) {
+                const bsAlert = new bootstrap.Alert(alertDiv);
+                bsAlert.close();
+            }
+        }, 3000);
+    }
+
+    // Функция обновления количества через API
+    async function updateQuantity(productId, newQuantity) {
+        try {
+            const response = await fetch(`/cart/items/${productId}`, { // Изменен URL
+                method: 'PUT', // Предполагаю, что это PUT метод
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json' // Добавлено
+                },
+                body: JSON.stringify({ quantity: newQuantity })
+            });
+
+            // Проверяем успешность по статусу ответа
+            if (response.ok) {
+                const data = await response.json();
+                showNotification('Количество обновлено', 'success');
+                // Перезагружаем страницу для обновления данных
+                setTimeout(() => location.reload(), 1000);
+            } else {
+                const data = await response.json();
+                const errorMessage = data.error || data.message || 'Ошибка обновления количества';
+                showNotification(errorMessage, 'danger');
+                // Восстанавливаем предыдущее значение
+                const input = document.querySelector(`[data-testid="quantity-input-${productId}"]`);
+                const currentValue = parseInt(input.getAttribute('data-current-value') || input.value);
+                input.value = currentValue;
+            }
+        } catch (error) {
+            console.error('Error updating quantity:', error);
+            showNotification('Ошибка обновления количества', 'danger');
+        }
+    }
+
+    // Сохраняем текущие значения quantity inputs
+    document.querySelectorAll('[data-testid^="quantity-input-"]').forEach(input => {
+        input.setAttribute('data-current-value', input.value);
+    });
+
+    // Увеличение количества
+    document.querySelectorAll('[data-testid^="increase-button-"]').forEach(button => {
+        button.addEventListener('click', function() {
+            const productId = this.getAttribute('data-product-id');
+            const input = document.querySelector(`[data-testid="quantity-input-${productId}"]`);
+
+            let newQuantity = parseInt(input.value) + 1;
+            const max = parseInt(input.max);
+
+            if (newQuantity > max) {
+                showNotification(`Максимальное количество: ${max}`, 'warning');
+                newQuantity = max;
+            }
+
+            input.value = newQuantity;
+            input.setAttribute('data-current-value', newQuantity);
+            updateQuantity(productId, newQuantity);
+        });
+    });
+
+    // Уменьшение количества
+    document.querySelectorAll('[data-testid^="decrease-button-"]').forEach(button => {
+        button.addEventListener('click', function() {
+            const productId = this.getAttribute('data-product-id');
+            const input = document.querySelector(`[data-testid="quantity-input-${productId}"]`);
+
+            let newQuantity = parseInt(input.value) - 1;
+            const min = parseInt(input.min);
+
+            if (newQuantity < min) {
+                showNotification(`Минимальное количество: ${min}`, 'warning');
+                newQuantity = min;
+            }
+
+            input.value = newQuantity;
+            input.setAttribute('data-current-value', newQuantity);
+            updateQuantity(productId, newQuantity);
+        });
+    });
+
+    // Изменение количества через input
+    document.querySelectorAll('[data-testid^="quantity-input-"]').forEach(input => {
+        input.addEventListener('change', function() {
+            const productId = this.getAttribute('data-product-id');
+            let newQuantity = parseInt(this.value);
+            const min = parseInt(this.min);
+            const max = parseInt(this.max);
+
+            if (isNaN(newQuantity) || newQuantity < min) {
+                newQuantity = min;
+                this.value = min;
+            } else if (newQuantity > max) {
+                newQuantity = max;
+                this.value = max;
+                showNotification(`Максимальное количество: ${max}`, 'warning');
+            }
+
+            this.setAttribute('data-current-value', newQuantity);
+            updateQuantity(productId, newQuantity);
+        });
+    });
+
+    // Удаление товара из корзины (без подтверждения)
+    document.querySelectorAll('[data-testid^="remove-item-button-"]').forEach(button => {
+        button.addEventListener('click', async function() {
+            const productId = this.getAttribute('data-product-id');
+            const buttonId = `remove-item-button-${productId}`;
+
+            // Сохраняем оригинальный HTML иконки
+            const originalHTML = this.innerHTML;
+            const originalTitle = this.title || 'Удалить';
+
+            // Меняем иконку на индикатор загрузки
+            this.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>';
+            this.title = 'Удаляем...';
+            this.disabled = true;
+
+            try {
+                const response = await fetch(`/cart/items/${productId}`, {
+                    method: 'DELETE',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json' // Добавлено
+                    }
+                });
+
+                // Проверяем успешность по статусу ответа
+                if (response.ok) {
+                    // Меняем иконку на успешное удаление
+                    this.innerHTML = '<i class="bi bi-check text-success" data-testid="removed-icon"></i>';
+                    this.title = 'Удалено';
+
+                    showNotification('Товар удален из корзины', 'success');
+
+                    // Перезагружаем страницу через 1 секунду
+                    setTimeout(() => location.reload(), 1000);
+                } else {
+                    const data = await response.json();
+                    const errorMessage = data.error || data.message || 'Ошибка удаления товара';
+                    showNotification(errorMessage, 'danger');
+                    // Восстанавливаем кнопку
+                    this.innerHTML = originalHTML;
+                    this.title = originalTitle;
+                    this.disabled = false;
+                }
+            } catch (error) {
+                console.error('Error removing item:', error);
+                showNotification('Ошибка удаления товара', 'danger');
+                // Восстанавливаем кнопку
+                this.innerHTML = originalHTML;
+                this.title = originalTitle;
+                this.disabled = false;
+            }
+        });
+    });
+
+    // Очистка корзины через модальное окно
+    const clearCartButton = document.getElementById('clearCartButton');
+    if (clearCartButton) {
+        clearCartButton.addEventListener('click', function() {
+            // Показываем модальное окно вместо стандартного confirm
+            const clearCartModal = new bootstrap.Modal(document.getElementById('clearCartModal'));
+            clearCartModal.show();
+        });
+    }
+
+    // Обработчик кнопки подтверждения в модальном окне
+    const confirmClearCartButton = document.getElementById('confirmClearCartButton');
+    if (confirmClearCartButton) {
+        confirmClearCartButton.addEventListener('click', async function() {
+            // Меняем состояние кнопки
+            const originalHTML = this.innerHTML;
+            const originalText = this.querySelector('[data-testid="confirm-clear-text"]')?.textContent || 'Очистить корзину';
+
+            this.innerHTML = `
+                <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                <span data-testid="clearing-text">Очищаем...</span>
+            `;
+            this.disabled = true;
+
+            try {
+                const response = await fetch('/cart', {
+                    method: 'DELETE',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json' // Добавлено
+                    }
+                });
+
+                // Проверяем успешность по статусу ответа
+                if (response.ok) {
+                    // Скрываем модальное окно
+                    const clearCartModal = bootstrap.Modal.getInstance(document.getElementById('clearCartModal'));
+                    clearCartModal.hide();
+
+                    // Показываем уведомление
+                    showNotification('Корзина очищена', 'success');
+
+                    // Перезагружаем страницу через 1.5 секунды
+                    setTimeout(() => location.reload(), 1500);
+                } else {
+                    const data = await response.json();
+                    const errorMessage = data.error || data.message || 'Ошибка очистки корзины';
+                    showNotification(errorMessage, 'danger');
+                    this.innerHTML = originalHTML;
+                    this.disabled = false;
+                }
+            } catch (error) {
+                console.error('Error clearing cart:', error);
+                showNotification('Ошибка очистки корзины', 'danger');
+                this.innerHTML = originalHTML;
+                this.disabled = false;
+            }
+        });
+    }
+
+    // Добавляем текст для кнопки подтверждения (если его нет)
+    if (confirmClearCartButton && !confirmClearCartButton.querySelector('[data-testid="confirm-clear-text"]')) {
+        const icon = confirmClearCartButton.querySelector('[data-testid="confirm-trash-icon"]');
+        if (icon) {
+            icon.insertAdjacentHTML('afterend', '<span data-testid="confirm-clear-text"> Очистить корзину</span>');
+        }
+    }
+});
+</script>
+{% endblock %}

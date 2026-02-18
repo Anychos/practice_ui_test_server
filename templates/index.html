@@ -1,0 +1,382 @@
+{% extends "base.html" %}
+
+{% block title %}Главная - Интернет-магазин{% endblock %}
+
+{% block content %}
+<!-- Hero секция -->
+<div class="hero-section" data-testid="hero-section" id="hero-section" class="main-hero">
+    <div class="bg-light rounded-3 p-5" data-testid="hero-container" id="hero-container">
+        <div class="container-fluid" data-testid="hero-content" id="hero-content">
+            <h1 class="display-5 fw-bold align-center mb-6" data-testid="main-title" id="main-title" class="hero-title">Добро пожаловать в наш магазин!</h1>
+            <p class="col-md-8 fs-4" data-testid="main-subtitle" id="main-subtitle" class="hero-subtitle">
+                Voluptate modi esse unde nam occaecati assumenda possimus quo nesciunt. Veritatis minima itaque non.
+                Nisi sapiente esse quibusdam dolor magnam occaecati exercitationem.
+                <br><br>
+                Veniam neque necessitatibus assumenda iusto ducimus molestias quidem. Laborum velit tenetur eum fugit aspernatur molestias dolorem laborum.
+                Omnis adipisci repellendus minima eligendi fuga voluptas ad officia.
+                <br><br>
+                Iste deleniti sit unde enim porro. Ab earum harum ipsum libero suscipit explicabo earum amet voluptates.
+                Totam enim sed reiciendis illo nobis alias.
+            </p>
+        </div>
+    </div>
+</div>
+
+<!-- Секция с товарами -->
+<div class="products-section mb-5 p-5" data-testid="products-section" id="products-section">
+    <div class="d-flex justify-content-between align-items-center mb-4" data-testid="products-header" id="products-header">
+        <h2 data-testid="products-title" id="products-title">Товары</h2>
+    </div>
+
+    {% if products and products|length > 0 %}
+    <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 row-cols-xl-4 g-4" data-testid="products-grid" id="products-grid">
+        {% for product in products %}
+        <!-- В сетке товаров обновляем карточку -->
+        <div class="col" data-testid="product-column-{{ product.id }}" id="product-column-{{ product.id }}">
+            <div class="card h-100 product-card" data-testid="product-card-{{ product.id }}" id="product-card-{{ product.id }}">
+                <!-- Делаем изображение кликабельным -->
+                <a href="{{ url_for('product_detail', product_id=product.id) }}"
+                   class="text-decoration-none"
+                   data-testid="product-image-link-{{ product.id }}"
+                   id="product-image-link-{{ product.id }}">
+                    <div class="product-image-container" style="height: 200px; overflow: hidden;"
+                         data-testid="product-image-container-{{ product.id }}"
+                         id="product-image-container-{{ product.id }}">
+                        {% if product.image_url %}
+                        <img src="{{ product.image_url }}"
+                             class="card-img-top h-100 object-fit-cover"
+                             alt="{{ product.name }}"
+                             data-testid="product-image-{{ product.id }}"
+                             id="product-image-{{ product.id }}"
+                             onerror="this.src='https://via.placeholder.com/300x200?text=No+Image'">
+                        {% else %}
+                        <div class="card-img-top h-100 bg-light d-flex align-items-center justify-content-center"
+                             data-testid="product-no-image-{{ product.id }}"
+                             id="product-no-image-{{ product.id }}">
+                            <i class="bi bi-image text-muted" style="font-size: 3rem;"
+                               data-testid="product-placeholder-icon"
+                               id="product-placeholder-icon-{{ product.id }}"></i>
+                        </div>
+                        {% endif %}
+
+                        <!-- Бэдж доступности -->
+                        <div class="position-absolute top-0 end-0 m-2"
+                             data-testid="availability-badge-{{ product.id }}"
+                             id="availability-badge-{{ product.id }}">
+                            {% if product.is_available and product.stock_quantity > 0 %}
+                            <span class="badge bg-success"
+                                  data-testid="in-stock-badge"
+                                  id="in-stock-badge-{{ product.id }}">
+                                <i class="bi bi-check-circle"
+                                   data-testid="in-stock-icon"
+                                   id="in-stock-icon-{{ product.id }}"></i> В наличии
+                            </span>
+                            {% else %}
+                            <span class="badge bg-danger"
+                                  data-testid="out-of-stock-badge"
+                                  id="out-of-stock-badge-{{ product.id }}">
+                                <i class="bi bi-x-circle"
+                                   data-testid="out-of-stock-icon"
+                                   id="out-of-stock-icon-{{ product.id }}"></i> Нет в наличии
+                            </span>
+                            {% endif %}
+                        </div>
+                    </div>
+                </a>
+
+                <div class="card-body d-flex flex-column"
+                     data-testid="product-card-body-{{ product.id }}"
+                     id="product-card-body-{{ product.id }}">
+                    <!-- Название товара (тоже кликабельное) -->
+                    <a href="{{ url_for('product_detail', product_id=product.id) }}"
+                       class="text-decoration-none text-dark"
+                       data-testid="product-name-link-{{ product.id }}"
+                       id="product-name-link-{{ product.id }}">
+                        <h5 class="card-title"
+                            data-testid="product-name-{{ product.id }}"
+                            id="product-name-{{ product.id }}">
+                            {{ product.name }}
+                        </h5>
+                    </a>
+
+                    <!-- Описание (урезанное) -->
+                    <p class="card-text text-muted small flex-grow-1"
+                       data-testid="product-description-{{ product.id }}"
+                       id="product-description-{{ product.id }}">
+                        {{ product.description[:100] }}{% if product.description|length > 100 %}...{% endif %}
+                    </p>
+
+                    <!-- Цена и кнопка -->
+                    <div class="d-flex justify-content-between align-items-center mt-auto"
+                         data-testid="product-footer-{{ product.id }}"
+                         id="product-footer-{{ product.id }}">
+                        <div data-testid="product-price-container-{{ product.id }}"
+                             id="product-price-container-{{ product.id }}">
+                            <span class="fw-bold fs-5"
+                                  data-testid="product-price-{{ product.id }}"
+                                  id="product-price-{{ product.id }}">
+                                {{ product.price }} ₽
+                            </span>
+                            {% if product.stock_quantity %}
+                            <div class="text-muted small"
+                                 data-testid="product-stock-{{ product.id }}"
+                                 id="product-stock-{{ product.id }}">
+                                Остаток: {{ product.stock_quantity }} шт.
+                            </div>
+                            {% endif %}
+                        </div>
+
+                        <div data-testid="product-actions-{{ product.id }}"
+                             id="product-actions-{{ product.id }}">
+                            {% if product.is_available and product.stock_quantity > 0 %}
+                            <button class="btn btn-primary btn-sm add-to-cart-btn"
+                                    data-product-id="{{ product.id }}"
+                                    data-testid="add-to-cart-button-{{ product.id }}"
+                                    id="add-to-cart-button-{{ product.id }}">
+                                <i class="bi bi-cart-plus"
+                                   data-testid="add-to-cart-icon"
+                                   id="add-to-cart-icon-{{ product.id }}"></i> В корзину
+                            </button>
+                            {% else %}
+                            <button class="btn btn-outline-secondary btn-sm"
+                                    disabled
+                                    data-testid="out-of-stock-button-{{ product.id }}"
+                                    id="out-of-stock-button-{{ product.id }}">
+                                <i class="bi bi-cart-x"
+                                   data-testid="out-of-stock-button-icon"
+                                   id="out-of-stock-button-icon-{{ product.id }}"></i> Нет в наличии
+                            </button>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Ссылка на детали товара -->
+                <div class="card-footer bg-transparent border-top-0"
+                     data-testid="product-card-footer-{{ product.id }}"
+                     id="product-card-footer-{{ product.id }}">
+                    <a href="{{ url_for('product_detail', product_id=product.id) }}"
+                       class="btn btn-link btn-sm p-0 text-decoration-none"
+                       data-testid="product-details-link-{{ product.id }}"
+                       id="product-details-link-{{ product.id }}">
+                        Подробнее <i class="bi bi-arrow-right"
+                                    data-testid="details-link-icon"
+                                    id="details-link-icon-{{ product.id }}"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+
+    {% else %}
+    <!-- Сообщение если нет товаров -->
+    <div class="text-center py-5" data-testid="empty-products-message" id="empty-products-message">
+        <div class="mb-4" data-testid="empty-products-icon-container" id="empty-products-icon-container">
+            <i class="bi bi-box-seam text-muted" style="font-size: 4rem;"
+               data-testid="empty-products-icon"
+               id="empty-products-icon"></i>
+        </div>
+        <h3 data-testid="empty-products-title" id="empty-products-title">Товары временно отсутствуют</h3>
+        <p class="text-muted mb-4" data-testid="empty-products-text" id="empty-products-text">
+            Мы обновляем ассортимент. Пожалуйста, зайдите позже.
+        </p>
+
+        {% if user and user.is_admin %}
+        <div class="alert alert-warning" style="max-width: 500px; margin: 0 auto;"
+             data-testid="admin-hint"
+             id="admin-hint">
+            <p class="mb-0" data-testid="admin-hint-text" id="admin-hint-text">
+                <i class="bi bi-exclamation-triangle"
+                   data-testid="admin-hint-icon"
+                   id="admin-hint-icon"></i>
+                <strong>Для администратора:</strong> Добавьте товары через API
+            </p>
+        </div>
+        {% endif %}
+    </div>
+    {% endif %}
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script data-testid="products-page-script" id="products-page-script">
+document.addEventListener('DOMContentLoaded', function() {
+    // Функция показа уведомления
+    function showNotification(message, type = 'info') {
+        // Создаем элемент уведомления
+        const alertDiv = document.createElement('div');
+        alertDiv.className = `alert alert-${type} alert-dismissible fade show position-fixed`;
+        alertDiv.style.cssText = 'top: 20px; right: 20px; z-index: 1050; min-width: 300px;';
+        alertDiv.setAttribute('data-testid', 'cart-notification');
+        alertDiv.setAttribute('id', 'cart-notification-' + Date.now());
+
+        alertDiv.innerHTML = `
+            <i class="bi bi-${type === 'success' ? 'check-circle' : 'info-circle'}"
+               data-testid="notification-icon"
+               id="notification-icon-${Date.now()}"></i>
+            <span data-testid="notification-message" id="notification-message-${Date.now()}">${message}</span>
+            <button type="button" class="btn-close" data-bs-dismiss="alert"
+                    data-testid="notification-close-button"
+                    id="notification-close-button-${Date.now()}"></button>
+        `;
+
+        // Добавляем на страницу
+        document.body.appendChild(alertDiv);
+
+        // Автоматически скрываем через 3 секунды
+        setTimeout(() => {
+            if (alertDiv.parentNode) {
+                alertDiv.parentNode.removeChild(alertDiv);
+            }
+        }, 3000);
+    }
+
+    // Функция добавления в корзину через API
+    async function addToCart(productId, quantity = 1) {
+        try {
+            const response = await fetch('/cart/items', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json'
+                },
+                body: JSON.stringify({
+                    product_id: productId,
+                    quantity: quantity
+                })
+            });
+
+            // Проверяем статус ответа
+            if (response.status === 401) {
+                // Неавторизован - показываем сообщение
+                const data = await response.json();
+                const errorMessage = data.error || 'Для добавления товара в корзину необходимо авторизоваться';
+                showNotification(errorMessage, 'warning');
+                return false;
+            }
+
+            // Проверяем успешность по статусу ответа (200-299)
+            if (response.ok) {
+                const data = await response.json();
+                showNotification('Товар добавлен в корзину', 'success');
+                // Обновляем счетчик корзины в навигации
+                updateCartCounter();
+                return true;
+            } else {
+                // Если есть сообщение об ошибке в ответе
+                const data = await response.json();
+                const errorMessage = data.error || data.message || 'Ошибка при добавлении товара';
+                showNotification(errorMessage, 'danger');
+                return false;
+            }
+        } catch (error) {
+            console.error('Error adding to cart:', error);
+            showNotification('Ошибка при добавлении товара', 'danger');
+            return false;
+        }
+    }
+
+    // Функция обновления счетчика корзины
+    function updateCartCounter() {
+        // Находим элемент счетчика корзины
+        const cartCounter = document.querySelector('[data-testid="cart-counter"]');
+        if (cartCounter) {
+            // Текущее значение счетчика
+            let currentCount = parseInt(cartCounter.textContent) || 0;
+
+            // Увеличиваем счетчик
+            cartCounter.textContent = currentCount + 1;
+
+            // Показываем счетчик, если он был скрыт
+            if (cartCounter.classList.contains('d-none')) {
+                cartCounter.classList.remove('d-none');
+            }
+
+            // Анимация обновления
+            cartCounter.classList.add('cart-counter-updated');
+            setTimeout(() => {
+                cartCounter.classList.remove('cart-counter-updated');
+            }, 300);
+        }
+    }
+
+    // Обновляем обработчики кнопок "В корзину"
+    document.querySelectorAll('[data-testid^="add-to-cart-button-"]').forEach(button => {
+        button.addEventListener('click', async function() {
+            const productId = this.getAttribute('data-product-id');
+            const buttonId = this.getAttribute('data-testid');
+            const buttonIdAttr = this.getAttribute('id');
+
+            // Сохраняем исходное состояние кнопки
+            const originalHTML = this.innerHTML;
+            const originalClasses = this.classList.toString();
+            const originalTestId = this.getAttribute('data-testid');
+            const originalId = this.getAttribute('id');
+
+            // Показываем состояние "загрузка"
+            this.innerHTML = '<span class="spinner-border spinner-border-sm me-1" role="status" data-testid="loading-spinner" id="loading-spinner-' + productId + '"></span>Добавляем...';
+            this.classList.remove('btn-primary');
+            this.classList.add('btn-secondary');
+            this.disabled = true;
+
+            // Добавляем в корзину через API
+            const success = await addToCart(productId, 1);
+
+            if (success) {
+                // Успешное добавление - меняем состояние кнопки
+                this.innerHTML = '<i class="bi bi-check" data-testid="added-check-icon" id="added-check-icon-' + productId + '"></i> Добавлено';
+                this.classList.remove('btn-secondary');
+                this.classList.add('btn-success');
+                this.disabled = true;
+                this.setAttribute('data-testid', `added-to-cart-button-${productId}`);
+                this.setAttribute('id', `added-to-cart-button-${productId}`);
+
+                // Можно оставить кнопку в состоянии "Добавлено" или восстановить через время
+                setTimeout(() => {
+                    if (this.getAttribute('data-testid').startsWith('added-to-cart-button')) {
+                        // Только если кнопка всё еще в состоянии "добавлено"
+                        this.innerHTML = originalHTML;
+                        this.className = originalClasses;
+                        this.setAttribute('data-testid', originalTestId);
+                        this.setAttribute('id', originalId);
+                        this.disabled = false;
+                    }
+                }, 3000);
+            } else {
+                // Ошибка - возвращаем исходное состояние
+                this.innerHTML = originalHTML;
+                this.className = originalClasses;
+                this.setAttribute('data-testid', originalTestId);
+                this.setAttribute('id', originalId);
+                this.disabled = false;
+            }
+        });
+    });
+
+    // Обработка ошибок загрузки изображений
+    document.querySelectorAll('[data-testid^="product-image-"]').forEach(img => {
+        img.addEventListener('error', function() {
+            this.src = 'https://33m2.com.ua/pictures/no-image.jpg';
+        });
+    });
+
+    // Добавляем стили для анимации счетчика корзины
+    const style = document.createElement('style');
+    style.setAttribute('data-testid', 'cart-counter-styles');
+    style.setAttribute('id', 'cart-counter-styles');
+    style.textContent = `
+        .cart-counter-updated {
+            animation: counterPulse 0.3s ease-in-out;
+        }
+
+        @keyframes counterPulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.3); }
+            100% { transform: scale(1); }
+        }
+    `;
+    document.head.appendChild(style);
+});
+</script>
+{% endblock %}

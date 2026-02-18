@@ -1,0 +1,545 @@
+{% extends "base.html" %}
+
+{% block title %}Оформление заказа - Интернет-магазин{% endblock %}
+
+{% block content %}
+<div class="container py-4" data-testid="checkout-page">
+    <!-- Хлебные крошки -->
+    <nav aria-label="breadcrumb" class="mb-4" data-testid="checkout-breadcrumb">
+        <ol class="breadcrumb" data-testid="breadcrumb-list">
+            <li class="breadcrumb-item" data-testid="breadcrumb-home">
+                <a href="{{ url_for('index') }}" data-testid="breadcrumb-home-link" class="text-decoration-none">
+                    <i class="bi bi-house" data-testid="breadcrumb-home-icon"></i> Главная
+                </a>
+            </li>
+            <li class="breadcrumb-item" data-testid="breadcrumb-cart">
+                <a href="{{ url_for('cart') }}" data-testid="breadcrumb-cart-link" class="text-decoration-none">
+                    <i class="bi bi-cart" data-testid="breadcrumb-cart-icon"></i> Корзина
+                </a>
+            </li>
+            <li class="breadcrumb-item active" aria-current="page" data-testid="breadcrumb-checkout">
+                <i class="bi bi-bag-check" data-testid="breadcrumb-checkout-icon"></i> Оформление заказа
+            </li>
+        </ol>
+    </nav>
+
+    <h1 class="mb-4" data-testid="checkout-title">
+        <i class="bi bi-bag-check" data-testid="checkout-title-icon"></i> Оформление заказа
+    </h1>
+
+    {% if cart and cart.id and cart_items and cart_items|length > 0 %}
+    <div class="row" data-testid="checkout-content">
+        <!-- Левая колонка - форма оформления -->
+        <div class="col-lg-8 mb-4" data-testid="checkout-form-column">
+            <div class="card" data-testid="checkout-form-card">
+                <div class="card-header" data-testid="checkout-form-header">
+                    <h5 class="mb-0" data-testid="form-title">
+                        <i class="bi bi-person" data-testid="form-title-icon"></i> Данные для доставки
+                    </h5>
+                </div>
+
+                <div class="card-body" data-testid="checkout-form-body">
+                    <form id="checkoutForm" data-testid="checkout-form">
+                        <!-- Информация о пользователе -->
+                        <div class="mb-4" data-testid="user-info-section">
+                            <h6 class="mb-3" data-testid="user-info-title">Ваши данные</h6>
+
+                            <div class="row" data-testid="user-info-fields">
+                                <div class="col-md-6 mb-3" data-testid="name-field-container">
+                                    <label for="fullName" class="form-label" data-testid="name-label">
+                                        ФИО <span class="text-danger" data-testid="required-star">*</span>
+                                    </label>
+                                    <input type="text" class="form-control" id="fullName" name="fullName"
+                                           value="{{ user.name if user else '' }}" required
+                                           data-testid="name-input">
+                                    <div class="invalid-feedback" data-testid="name-error">
+                                        Пожалуйста, введите ваше ФИО
+                                    </div>
+                                </div>
+
+                                <div class="col-md-6 mb-3" data-testid="phone-field-container">
+                                    <label for="phone" class="form-label" data-testid="phone-label">
+                                        Телефон <span class="text-danger" data-testid="required-star">*</span>
+                                    </label>
+                                    <input type="tel" class="form-control" id="phone" name="phone"
+                                           value="{{ user.phone if user and user.phone else '' }}"  placeholder="88005553535"
+                                           data-testid="phone-input">
+                                </div>
+
+                                <div class="col-md-12 mb-3" data-testid="email-field-container">
+                                    <label for="email" class="form-label" data-testid="email-label">
+                                        Email <span class="text-danger" data-testid="required-star">*</span>
+                                    </label>
+                                    <input type="email" class="form-control" id="email" name="email"
+                                           value="{{ user.email if user else '' }}" required
+                                           data-testid="email-input">
+                                    <div class="invalid-feedback" data-testid="email-error">
+                                        Пожалуйста, введите корректный email
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Адрес доставки -->
+                        <div class="mb-4" data-testid="delivery-section">
+                            <h6 class="mb-3" data-testid="delivery-title">
+                                <i class="bi bi-truck" data-testid="delivery-icon"></i> Адрес доставки
+                            </h6>
+
+                            <div class="row" data-testid="address-fields">
+                                <div class="col-md-8 mb-3" data-testid="address-field-container">
+                                    <label for="address" class="form-label" data-testid="address-label">
+                                        Адрес <span class="text-danger" data-testid="required-star">*</span>
+                                    </label>
+                                    <input type="text" class="form-control" id="address" name="address"
+                                           required data-testid="address-input"
+                                           placeholder="Город, улица, дом, квартира">
+                                    <div class="invalid-feedback" data-testid="address-error">
+                                        Пожалуйста, введите адрес доставки
+                                    </div>
+                                </div>
+
+                                <div class="col-md-4 mb-3" data-testid="zip-field-container">
+                                    <label for="zipCode" class="form-label" data-testid="zip-label">
+                                        Индекс
+                                    </label>
+                                    <input type="text" class="form-control" id="zipCode" name="zipCode"
+                                           pattern="[0-9]{6}" data-testid="zip-input">
+                                    <div class="invalid-feedback" data-testid="zip-error">
+                                        Введите 6 цифр почтового индекса
+                                    </div>
+                                </div>
+
+                                <div class="col-md-12 mb-3" data-testid="comment-field-container">
+                                    <label for="deliveryComment" class="form-label" data-testid="comment-label">
+                                        Комментарий к доставке
+                                    </label>
+                                    <textarea class="form-control" id="deliveryComment" name="deliveryComment"
+                                              rows="3" data-testid="comment-textarea"
+                                              placeholder="Дополнительные пожелания по доставке"></textarea>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Способ оплаты -->
+                        <div class="mb-4" data-testid="payment-section">
+                            <h6 class="mb-3" data-testid="payment-title">
+                                <i class="bi bi-credit-card" data-testid="payment-icon"></i> Способ оплаты
+                            </h6>
+
+                            <div class="list-group" data-testid="payment-methods">
+                                <div class="list-group-item" data-testid="payment-method-card">
+                                    <div class="form-check" data-testid="card-payment-option">
+                                        <input class="form-check-input" type="radio" name="paymentMethod"
+                                               id="paymentCard" value="card" checked
+                                               data-testid="card-payment-radio">
+                                        <label class="form-check-label w-100" for="paymentCard"
+                                               data-testid="card-payment-label">
+                                            <div class="d-flex justify-content-between align-items-center"
+                                                 data-testid="card-payment-content">
+                                                <div data-testid="card-payment-info">
+                                                    <strong data-testid="card-payment-title">Банковская карта</strong>
+                                                    <div class="text-muted small" data-testid="card-payment-description">
+                                                        Оплата онлайн банковской картой
+                                                    </div>
+                                                </div>
+                                                <div data-testid="card-icons">
+                                                    <i class="bi bi-credit-card-2-front fs-4 text-primary"
+                                                       data-testid="card-icon"></i>
+                                                </div>
+                                            </div>
+                                        </label>
+                                    </div>
+                                </div>
+
+                                <div class="list-group-item" data-testid="payment-method-cash">
+                                    <div class="form-check" data-testid="cash-payment-option">
+                                        <input class="form-check-input" type="radio" name="paymentMethod"
+                                               id="paymentCash" value="cash"
+                                               data-testid="cash-payment-radio">
+                                        <label class="form-check-label w-100" for="paymentCash"
+                                               data-testid="cash-payment-label">
+                                            <div class="d-flex justify-content-between align-items-center"
+                                                 data-testid="cash-payment-content">
+                                                <div data-testid="cash-payment-info">
+                                                    <strong data-testid="cash-payment-title">Наличные при получении</strong>
+                                                    <div class="text-muted small" data-testid="cash-payment-description">
+                                                        Оплата наличными курьеру или в пункте выдачи
+                                                    </div>
+                                                </div>
+                                                <div data-testid="cash-icon-container">
+                                                    <i class="bi bi-cash fs-4 text-success" data-testid="cash-icon"></i>
+                                                </div>
+                                            </div>
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Соглашения -->
+                        <div class="mb-4" data-testid="agreements-section">
+                            <div class="form-check" data-testid="terms-agreement">
+                                <input class="form-check-input" type="checkbox" id="agreeTerms" required
+                                       data-testid="terms-checkbox">
+                                <label class="form-check-label small" for="agreeTerms"
+                                       data-testid="terms-label">
+                                    Я соглашаюсь с
+                                    <a href="#" data-testid="terms-link">условиями обработки персональных данных</a>
+                                    и
+                                    <a href="#" data-testid="privacy-link">политикой конфиденциальности</a>
+                                    <span class="text-danger" data-testid="required-star">*</span>
+                                </label>
+                                <div class="invalid-feedback" data-testid="terms-error">
+                                    Необходимо согласие с условиями
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- Правая колонка - итоги заказа -->
+        <div class="col-lg-4" data-testid="order-summary-column">
+            <div class="card sticky-top" style="top: 20px;" data-testid="order-summary-card">
+                <div class="card-header" data-testid="order-summary-header">
+                    <h5 class="mb-0" data-testid="summary-title">Ваш заказ</h5>
+                </div>
+
+                <div class="card-body" data-testid="order-summary-body">
+                    <!-- Информация о корзине -->
+                    <div class="mb-3" data-testid="cart-info">
+                        <div class="d-flex justify-content-between align-items-center mb-2"
+                             data-testid="cart-number-row">
+                            <span class="text-muted" data-testid="cart-number-label">Корзина:</span>
+                            <span class="fw-bold" data-testid="cart-number-value">#{{ cart.id }}</span>
+                        </div>
+                        <div class="d-flex justify-content-between align-items-center"
+                             data-testid="cart-items-row">
+                            <span class="text-muted" data-testid="cart-items-label">Товаров:</span>
+                            <span data-testid="cart-items-value">{{ cart.total_quantity }} шт.</span>
+                        </div>
+                    </div>
+
+                    <!-- Список товаров -->
+                    <div class="mb-3" data-testid="order-items">
+                        <h6 class="mb-2" data-testid="items-title">Состав заказа:</h6>
+                        <div class="list-group list-group-flush" data-testid="items-list">
+                            {% for item in cart_items %}
+                            <div class="list-group-item px-0 py-2" data-testid="order-item-{{ item.product_id }}">
+                                <div class="d-flex justify-content-between align-items-start"
+                                     data-testid="order-item-row-{{ item.product_id }}">
+                                    <div data-testid="order-item-info-{{ item.product_id }}">
+                                        <div class="fw-bold small" data-testid="order-item-name-{{ item.product_id }}">
+                                            {{ item.product_name }}
+                                        </div>
+                                        <div class="text-muted small" data-testid="order-item-details-{{ item.product_id }}">
+                                            {{ item.quantity }} × {{ item.product_price }} ₽
+                                        </div>
+                                    </div>
+                                    <div class="fw-bold" data-testid="order-item-total-{{ item.product_id }}">
+                                        {{ item.item_total }} ₽
+                                    </div>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+
+                    <!-- Итоговая стоимость -->
+                    <div class="mb-4" data-testid="order-totals">
+                        <div class="d-flex justify-content-between mb-2" data-testid="subtotal-row">
+                            <span data-testid="subtotal-label">Товары</span>
+                            <span data-testid="subtotal-value">{{ cart.total_price }} ₽</span>
+                        </div>
+
+                        <div class="d-flex justify-content-between mb-2" data-testid="delivery-row">
+                            <span data-testid="delivery-label">Доставка</span>
+                            <span data-testid="delivery-value">
+                                {% if cart.total_price >= 1000 %}
+                                <span class="text-success" data-testid="free-delivery">Бесплатно</span>
+                                {% else %}
+                                100 ₽
+                                {% endif %}
+                            </span>
+                        </div>
+
+                        <hr data-testid="totals-divider">
+
+                        <div class="d-flex justify-content-between fw-bold fs-5" data-testid="total-row">
+                            <span data-testid="total-label">Итого к оплате</span>
+                            <span data-testid="total-value">
+                                {% if cart.total_price >= 1000 %}
+                                {{ cart.total_price }} ₽
+                                {% else %}
+                                {{ cart.total_price + 100 }} ₽
+                                {% endif %}
+                            </span>
+                        </div>
+                    </div>
+
+                    <!-- Кнопка подтверждения заказа -->
+                    <div class="d-grid gap-2" data-testid="order-actions">
+                        <button type="submit" form="checkoutForm" class="btn btn-primary btn-lg"
+                                id="placeOrderButton" data-testid="place-order-button">
+                            <i class="bi bi-check-circle" data-testid="place-order-icon"></i>
+                        </button>
+
+                        <a href="{{ url_for('cart') }}" class="btn btn-outline-secondary"
+                           data-testid="back-to-cart-button">
+                            <i class="bi bi-arrow-left" data-testid="back-to-cart-icon"></i> Вернуться в корзину
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% else %}
+    <!-- Корзина пуста или нет данных -->
+    <div class="text-center py-5" data-testid="checkout-error">
+        <div class="mb-4" data-testid="error-icon">
+            <i class="bi bi-exclamation-triangle text-warning" style="font-size: 4rem;"></i>
+        </div>
+        <h3 data-testid="error-title">Невозможно оформить заказ</h3>
+        <p class="text-muted mb-4" data-testid="error-message">
+            {% if not cart or not cart.id %}
+            Ваша корзина пуста
+            {% elif not cart_items or cart_items|length == 0 %}
+            В корзине нет товаров
+            {% endif %}
+        </p>
+        <div data-testid="error-actions">
+            <a href="{{ url_for('index') }}" class="btn btn-primary" data-testid="browse-products-button">
+                <i class="bi bi-grid" data-testid="browse-icon"></i> Перейти к товарам
+            </a>
+            <a href="{{ url_for('cart') }}" class="btn btn-outline-secondary ms-2" data-testid="view-cart-button">
+                <i class="bi bi-cart" data-testid="cart-icon"></i> Перейти в корзину
+            </a>
+        </div>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script data-testid="checkout-page-script">
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('Checkout page script loaded'); // Для отладки
+
+    // Валидация формы
+    const checkoutForm = document.getElementById('checkoutForm');
+    const placeOrderButton = document.getElementById('placeOrderButton');
+
+    if (!checkoutForm) {
+        console.error('Checkout form not found!');
+        return;
+    }
+
+    if (!placeOrderButton) {
+        console.error('Place order button not found!');
+        return;
+    }
+
+    console.log('Form and button found:', checkoutForm, placeOrderButton);
+
+    // Функция показа уведомления
+    function showNotification(message, type = 'info') {
+        console.log('Showing notification:', message, type);
+
+        // Удаляем предыдущие уведомления
+        const existingNotifications = document.querySelectorAll('[data-testid="checkout-notification"]');
+        existingNotifications.forEach(notification => notification.remove());
+
+        const alertDiv = document.createElement('div');
+        alertDiv.className = `alert alert-${type} alert-dismissible fade show position-fixed`;
+        alertDiv.style.cssText = 'top: 20px; right: 20px; z-index: 1050; min-width: 300px;';
+        alertDiv.setAttribute('data-testid', 'checkout-notification');
+
+        const icon = type === 'success' ? 'check-circle' :
+                     type === 'danger' ? 'exclamation-triangle' : 'info-circle';
+
+        alertDiv.innerHTML = `
+            <i class="bi bi-${icon}" data-testid="notification-icon"></i>
+            <span class="ms-2" data-testid="notification-message">${message}</span>
+            <button type="button" class="btn-close" data-bs-dismiss="alert"
+                    data-testid="notification-close-button"></button>
+        `;
+
+        document.body.appendChild(alertDiv);
+
+        setTimeout(() => {
+            if (alertDiv.parentNode) {
+                const bsAlert = new bootstrap.Alert(alertDiv);
+                bsAlert.close();
+            }
+        }, 5000);
+    }
+
+    // Функция создания заказа через API
+    async function createOrder() {
+        console.log('Creating order...');
+
+        try {
+            // Показываем индикатор загрузки
+            const originalHtml = placeOrderButton.innerHTML;
+            const originalText = placeOrderButton.querySelector('[data-testid="place-order-text"]')?.textContent || 'Подтвердить заказ';
+
+            placeOrderButton.innerHTML = `
+                <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                <span data-testid="loading-text">Оформляем заказ...</span>
+            `;
+            placeOrderButton.disabled = true;
+
+            // Получаем cart_id из данных на странице
+            const cartId = {{ cart.id if cart and cart.id else 'null' }};
+            console.log('Cart ID:', cartId);
+
+            if (!cartId) {
+                throw new Error('Не удалось определить корзину');
+            }
+
+            const response = await fetch('/api/orders/create', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ cart_id: cartId })
+            });
+
+            const data = await response.json();
+            console.log('API response:', data);
+
+            if (data.success) {
+                showNotification('Заказ успешно создан!', 'success');
+
+                // Сохраняем номер заказа для перенаправления
+                const orderId = data.order.id;
+
+                // Через 2 секунды перенаправляем на страницу заказа
+                setTimeout(() => {
+                    window.location.href = `/orders/${orderId}`;
+                }, 2000);
+
+            } else {
+                showNotification(data.message || 'Ошибка создания заказа', 'danger');
+                placeOrderButton.innerHTML = originalHtml;
+                placeOrderButton.disabled = false;
+            }
+
+        } catch (error) {
+            console.error('Error creating order:', error);
+            showNotification('Ошибка создания заказа: ' + error.message, 'danger');
+            placeOrderButton.innerHTML = '<i class="bi bi-check-circle"></i> Подтвердить заказ';
+            placeOrderButton.disabled = false;
+        }
+    }
+
+    // Обработка клика по кнопке (ДОБАВЛЕНО)
+    placeOrderButton.addEventListener('click', async function(event) {
+        console.log('Place order button clicked');
+        event.preventDefault();
+
+        // Проверяем валидность формы
+        if (!checkoutForm.checkValidity()) {
+            console.log('Form is invalid');
+            checkoutForm.classList.add('was-validated');
+            showNotification('Пожалуйста, заполните все обязательные поля', 'warning');
+
+            // Прокручиваем к первому невалидному полю
+            const firstInvalid = checkoutForm.querySelector(':invalid');
+            if (firstInvalid) {
+                firstInvalid.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                firstInvalid.focus();
+            }
+            return;
+        }
+
+        console.log('Form is valid, creating order...');
+
+        // Собираем данные формы (опционально, для логов)
+        const formData = {
+            fullName: document.getElementById('fullName')?.value,
+            phone: document.getElementById('phone')?.value,
+            email: document.getElementById('email')?.value,
+            address: document.getElementById('address')?.value,
+            zipCode: document.getElementById('zipCode')?.value,
+            deliveryComment: document.getElementById('deliveryComment')?.value,
+            paymentMethod: document.querySelector('input[name="paymentMethod"]:checked')?.value,
+            agreeTerms: document.getElementById('agreeTerms')?.checked,
+            agreeNewsletter: document.getElementById('agreeNewsletter')?.checked
+        };
+
+        console.log('Checkout form data:', formData);
+
+        // Создаем заказ
+        await createOrder();
+    });
+
+    // Также оставляем обработчик submit для формы (на случай Enter)
+    checkoutForm.addEventListener('submit', async function(event) {
+        console.log('Form submit event');
+        event.preventDefault();
+        event.stopPropagation();
+
+        // Триггерим клик по кнопке
+        placeOrderButton.click();
+    });
+
+    // Валидация в реальном времени
+    const formInputs = checkoutForm.querySelectorAll('input, textarea, select');
+    formInputs.forEach(input => {
+        input.addEventListener('input', function() {
+            if (this.checkValidity()) {
+                this.classList.remove('is-invalid');
+                this.classList.add('is-valid');
+            } else {
+                this.classList.remove('is-valid');
+                this.classList.add('is-invalid');
+            }
+        });
+
+        input.addEventListener('blur', function() {
+            this.classList.add('touched');
+        });
+    });
+
+    // Маска для телефона
+    const phoneInput = document.getElementById('phone');
+    if (phoneInput) {
+        phoneInput.addEventListener('input', function() {
+            let value = this.value.replace(/\D/g, '');
+            if (value.length > 11) value = value.substring(0, 11);
+            this.value = value;
+
+            // Автоматическая валидация
+            if (value.length === 11) {
+                this.classList.remove('is-invalid');
+                this.classList.add('is-valid');
+            } else if (this.value && value.length !== 11) {
+                this.classList.remove('is-valid');
+                this.classList.add('is-invalid');
+            }
+        });
+    }
+
+    // Маска для индекса
+    const zipInput = document.getElementById('zipCode');
+    if (zipInput) {
+        zipInput.addEventListener('input', function() {
+            let value = this.value.replace(/\D/g, '');
+            if (value.length > 6) value = value.substring(0, 6);
+            this.value = value;
+        });
+    }
+
+    // Добавляем текст для кнопки (если его нет)
+    if (!placeOrderButton.querySelector('[data-testid="place-order-text"]')) {
+        const icon = placeOrderButton.querySelector('[data-testid="place-order-icon"]');
+        if (icon) {
+            icon.insertAdjacentHTML('afterend', '<span data-testid="place-order-text"> Подтвердить заказ</span>');
+        }
+    }
+});
+</script>
+{% endblock %}

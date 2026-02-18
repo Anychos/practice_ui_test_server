@@ -1,0 +1,123 @@
+{% extends "base.html" %}
+
+{% block title %}Заказ успешно оформлен - Интернет-магазин{% endblock %}
+
+{% block content %}
+<div class="container py-5" data-testid="order-success-page">
+    <div class="text-center" data-testid="success-content">
+        <!-- Иконка успеха -->
+        <div class="mb-4" data-testid="success-icon">
+            <div class="display-1 text-success" data-testid="success-icon-content">
+                <i class="bi bi-check-circle-fill" data-testid="success-icon-symbol"></i>
+            </div>
+        </div>
+
+        <!-- Заголовок -->
+        <h1 class="mb-3" data-testid="success-title">Заказ успешно оформлен!</h1>
+
+        <!-- Номер заказа -->
+        <div class="card border-success mb-4 mx-auto" style="max-width: 400px;" data-testid="order-card">
+            <div class="card-body text-center" data-testid="order-card-body">
+                <h5 class="card-title mb-2" data-testid="order-number-title">Номер вашего заказа</h5>
+                <div class="display-4 fw-bold text-success mb-3" data-testid="order-number">
+                    #{{ order.id }}
+                </div>
+                <p class="card-text text-muted mb-2" data-testid="order-date">
+                    <i class="bi bi-calendar" data-testid="date-icon"></i>
+                    {{ order.formatted_date }}
+                </p>
+                <p class="card-text text-muted" data-testid="order-cart">
+                    <i class="bi bi-cart" data-testid="cart-icon"></i>
+                    Создан из корзины #{{ order.cart_id }}
+                </p>
+            </div>
+        </div>
+
+        <!-- Информация о следующих шагах -->
+        <div class="row justify-content-center mb-5" data-testid="next-steps">
+            <div class="col-md-8" data-testid="steps-container">
+                <div class="card" data-testid="steps-card">
+                    <div class="card-header" data-testid="steps-header">
+                        <h5 class="mb-0" data-testid="steps-title">Что будет дальше?</h5>
+                    </div>
+                    <div class="card-body" data-testid="steps-body">
+                        <div class="row text-start" data-testid="steps-list">
+                            <div class="col-md-4 mb-3" data-testid="step-1">
+                                <div class="d-flex" data-testid="step-1-content">
+                                    <div class="me-3" data-testid="step-1-icon">
+                                        <span class="badge bg-primary rounded-circle p-2"
+                                              data-testid="step-1-badge">1</span>
+                                    </div>
+                                    <div data-testid="step-1-text">
+                                        <h6 data-testid="step-1-title">Подтверждение</h6>
+                                        <p class="small text-muted mb-0" data-testid="step-1-description">
+                                            Мы свяжемся с вами для подтверждения заказа
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-4 mb-3" data-testid="step-2">
+                                <div class="d-flex" data-testid="step-2-content">
+                                    <div class="me-3" data-testid="step-2-icon">
+                                        <span class="badge bg-primary rounded-circle p-2"
+                                              data-testid="step-2-badge">2</span>
+                                    </div>
+                                    <div data-testid="step-2-text">
+                                        <h6 data-testid="step-2-title">Обработка</h6>
+                                        <p class="small text-muted mb-0" data-testid="step-2-description">
+                                            Заказ будет собран и подготовлен к отправке
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-4 mb-3" data-testid="step-3">
+                                <div class="d-flex" data-testid="step-3-content">
+                                    <div class="me-3" data-testid="step-3-icon">
+                                        <span class="badge bg-primary rounded-circle p-2"
+                                              data-testid="step-3-badge">3</span>
+                                    </div>
+                                    <div data-testid="step-3-text">
+                                        <h6 data-testid="step-3-title">Доставка</h6>
+                                        <p class="small text-muted mb-0" data-testid="step-3-description">
+                                            Курьер доставит заказ по указанному адресу
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Кнопки действий -->
+        <div class="d-grid gap-2 d-md-flex justify-content-center" data-testid="success-actions">
+            <a href="{{ url_for('orders') }}" class="btn btn-primary btn-lg me-md-2"
+               data-testid="view-orders-button">
+                <i class="bi bi-list-check" data-testid="view-orders-icon"></i> Перейти к моим заказам
+            </a>
+            <a href="{{ url_for('index') }}" class="btn btn-outline-primary btn-lg"
+               data-testid="continue-shopping-button">
+                <i class="bi bi-shop" data-testid="continue-shopping-icon"></i> Продолжить покупки
+            </a>
+        </div>
+
+        <!-- Контактная информация -->
+        <div class="mt-5 pt-4 border-top" data-testid="contact-info">
+            <p class="text-muted mb-2" data-testid="contact-text">
+                Вопросы по заказу?
+            </p>
+            <div data-testid="contact-details">
+                <a href="tel:+78001234567" class="btn btn-outline-secondary me-2"
+                   data-testid="phone-button">
+                    <i class="bi bi-telephone" data-testid="phone-icon"></i> 8-800-123-45-67
+                </a>
+                <a href="mailto:support@example.com" class="btn btn-outline-secondary"
+                   data-testid="email-button">
+                    <i class="bi bi-envelope" data-testid="email-icon"></i> support@example.com
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
